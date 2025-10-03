@@ -1,40 +1,40 @@
-import { Response } from 'express';
-import { HttpStatus } from '../../../core/types/HttpStatus';
-import { postsService } from '../../application/posts.service';
-import { createErrorMessages } from '../../../core/utils/error.utils';
-import { RequestWithParamsAndBodyAndUserId } from '../../../core/types/requests';
-import { IdType } from '../../../core/types/id';
-import { CommentInputDto } from '../../../6-comments/dto/comment-input.dto';
-import { UsersQwRepository } from '../../../4-users/qw-repository/users-qw-repository';
-import { container } from '../../../composition-root';
-import { CommentsService } from '../../../6-comments/application/comments.service';
+// import { Response } from 'express';
+// import { HttpStatus } from '../../../core/types/HttpStatus';
+// import { postsService } from '../../application/posts.service';
+// import { createErrorMessages } from '../../../core/utils/error.utils';
+// import { RequestWithParamsAndBodyAndUserId } from '../../../core/types/requests';
+// import { IdType } from '../../../core/types/id';
+// import { CommentInputDto } from '../../../6-comments/dto/comment-input.dto';
+// import { UsersQwRepository } from '../../../4-users/qw-repository/users-qw-repository';
+// import { container } from '../../../composition-root';
+// import { CommentsService } from '../../../6-comments/application/comments.service';
 
-const usersQwRepository = container.get<UsersQwRepository>(UsersQwRepository);
-const commentsService = container.get<CommentsService>(CommentsService);
+// const usersQwRepository = container.get<UsersQwRepository>(UsersQwRepository);
+// const commentsService = container.get<CommentsService>(CommentsService);
 
-export async function postCommentHandler(
-  req: RequestWithParamsAndBodyAndUserId<IdType, CommentInputDto, IdType>,
-  res: Response,
-) {
-  try {
-    const post = await postsService.findById(req.params.id);
+// export async function postCommentHandler(
+//   req: RequestWithParamsAndBodyAndUserId<IdType, CommentInputDto, IdType>,
+//   res: Response,
+// ) {
+//   try {
+//     const post = await postsService.findById(req.params.id);
 
-    if (!post) {
-      res.status(HttpStatus.NotFound).send(createErrorMessages([{ field: 'id', message: 'Post not found' }]));
-      return;
-    }
+//     if (!post) {
+//       res.status(HttpStatus.NotFound).send(createErrorMessages([{ field: 'id', message: 'Post not found' }]));
+//       return;
+//     }
 
-    const user = await usersQwRepository.findById(req.user!.id);
+//     const user = await usersQwRepository.findById(req.user!.id);
 
-    if (!user) {
-      res.status(HttpStatus.NotFound).send(createErrorMessages([{ field: 'id', message: 'User not found' }]));
-      return;
-    }
+//     if (!user) {
+//       res.status(HttpStatus.NotFound).send(createErrorMessages([{ field: 'id', message: 'User not found' }]));
+//       return;
+//     }
 
-    const createdComment = await commentsService.create(req.body, user.id, user.login, post._id);
+//     const createdComment = await commentsService.create(req.body, user.id, user.login, post._id);
 
-    res.status(HttpStatus.Created).send(createdComment);
-  } catch (error: unknown) {
-    res.sendStatus(HttpStatus.InternalServerError);
-  }
-}
+//     res.status(HttpStatus.Created).send(createdComment);
+//   } catch (error: unknown) {
+//     res.sendStatus(HttpStatus.InternalServerError);
+//   }
+// }

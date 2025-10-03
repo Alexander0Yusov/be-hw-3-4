@@ -16,6 +16,9 @@ import { CommentsController } from './6-comments/router/controller/comments-cont
 import { LikesRepository } from './8-likes/repository/likes.repository';
 import { LikesService } from './8-likes/application/likes.service';
 import { LikesController } from './8-likes/controller/likes-controller';
+import { PostsRepository } from './2-posts/repository/posts.repository';
+import { PostsService } from './2-posts/application/posts.service';
+import { PostsController } from './2-posts/controller/posts-controller';
 
 export const container = new Container();
 
@@ -39,3 +42,7 @@ container.bind(CommentsController).toSelf();
 container.bind(LikesRepository).toSelf();
 container.bind(LikesService).toSelf();
 container.bind(LikesController).toSelf();
+
+container.bind(PostsRepository).toSelf();
+container.bind(PostsService).toSelf();
+container.bind(PostsController).toSelf();

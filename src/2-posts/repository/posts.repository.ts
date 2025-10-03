@@ -3,8 +3,10 @@ import { PostInputDto } from '../dto/post-input.dto';
 import { Post } from '../types/post';
 import { db } from '../../db/mongo.db';
 import { PostQueryInput } from '../router/input/blog-query.input';
+import { injectable } from 'inversify';
 
-export const postsRepository = {
+@injectable()
+export class PostsRepository {
   async findMany(queryDto: PostQueryInput): Promise<{ items: WithId<Post>[]; totalCount: number }> {
     const { pageNumber, pageSize, sortBy, sortDirection } = queryDto;
 
@@ -22,23 +24,13 @@ export const postsRepository = {
     const totalCount = await db.getCollections().postCollection.countDocuments(filter);
 
     return { items, totalCount };
-  },
+  }
 
   async findManyById(id: string, queryDto: PostQueryInput): Promise<{ items: WithId<Post>[]; totalCount: number }> {
-    const {
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-      // searchNameTerm
-    } = queryDto;
+    const { pageNumber, pageSize, sortBy, sortDirection } = queryDto;
 
     const skip = (pageNumber - 1) * pageSize;
     const filter: any = {};
-
-    // if (searchNameTerm) {
-    //   filter.name = { $regex: searchNameTerm, $options: 'i' };
-    // }
 
     filter.blogId = new ObjectId(id);
 
@@ -53,17 +45,17 @@ export const postsRepository = {
     const totalCount = await db.getCollections().postCollection.countDocuments(filter);
 
     return { items, totalCount };
-  },
+  }
 
   async findById(id: string): Promise<WithId<Post> | null> {
     return db.getCollections().postCollection.findOne({ _id: new ObjectId(id) });
-  },
+  }
 
   async create(post: Post): Promise<WithId<Post>> {
     const insertedResult = await db.getCollections().postCollection.insertOne(post);
 
     return { ...post, _id: insertedResult.insertedId };
-  },
+  }
 
   async update(id: string, dto: PostInputDto, blogName: string): Promise<void> {
     const updateResult = await db.getCollections().postCollection.updateOne(
@@ -84,7 +76,7 @@ export const postsRepository = {
     }
 
     return;
-  },
+  }
 
   async delete(id: string): Promise<void> {
     const deleteResult = await db.getCollections().postCollection.deleteOne({
@@ -94,5 +86,5 @@ export const postsRepository = {
     if (deleteResult.deletedCount < 1) {
       throw new Error('Blog not exist');
     }
-  },
-};
+  }
+}
