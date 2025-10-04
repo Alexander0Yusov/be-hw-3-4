@@ -25,6 +25,9 @@ export class PostsService {
       blogId: new ObjectId(blogId),
       blogName,
       createdAt: new Date(),
+      likesCount: 0,
+      dislikesCount: 0,
+      newestLikes: [],
     };
 
     return this.postsRepository.create(newPost);

@@ -11,6 +11,8 @@ export type Like = {
   authorId: Types.ObjectId;
   parentId: Types.ObjectId;
 
+  login?: string;
+
   createdAt: Date;
   updatedAt: Date;
 };

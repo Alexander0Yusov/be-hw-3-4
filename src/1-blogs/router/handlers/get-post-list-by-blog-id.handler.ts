@@ -9,6 +9,7 @@ import { HttpStatus } from '../../../core/types/HttpStatus';
 import { mapToPostListPaginatedOutput } from '../../../2-posts/mappers/map-to-postlist-paginated-output.util';
 import { createErrorMessages } from '../../../core/utils/error.utils';
 import { container } from '../../../composition-root';
+import { LikeStatus } from '../../../8-likes/types/like';
 
 const postsService = container.get<PostsService>(PostsService);
 
@@ -27,8 +28,10 @@ export async function getPostListByBlogIdHandler(req: Request, res: Response) {
     // делаем запрос за постами в которых блогАйди данный
     const { items, totalCount } = await postsService.findManyById(req.params.id, queryInput as any);
 
+    const itemsWithMyStatus = items.map((item) => ({ ...item, myStatus: LikeStatus.None }));
+
     // мапим и возвращаем
-    const postsOutput = mapToPostListPaginatedOutput(items, {
+    const postsOutput = mapToPostListPaginatedOutput(itemsWithMyStatus, {
       pageNumber: queryInput.pageNumber,
       pageSize: queryInput.pageSize,
       totalCount,

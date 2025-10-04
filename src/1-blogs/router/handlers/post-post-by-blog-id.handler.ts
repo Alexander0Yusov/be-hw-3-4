@@ -7,6 +7,7 @@ import { mapToPostViewModel } from '../../../2-posts/mappers/map-to-post-view-mo
 import { HttpStatus } from '../../../core/types/HttpStatus';
 import { createErrorMessages } from '../../../core/utils/error.utils';
 import { container } from '../../../composition-root';
+import { LikeStatus } from '../../../8-likes/types/like';
 
 const postsService = container.get<PostsService>(PostsService);
 
@@ -21,7 +22,9 @@ export async function postPostByBlogIdHandler(req: Request, res: Response) {
 
     const createdPost = await postsService.create(req.body, blog._id.toString(), blog.name);
 
-    const postsOutput = mapToPostViewModel(createdPost);
+    const createdPostWithMyStatus = { ...createdPost, myStatus: LikeStatus.None };
+
+    const postsOutput = mapToPostViewModel(createdPostWithMyStatus);
 
     res.status(HttpStatus.Created).send(postsOutput);
   } catch (e: unknown) {

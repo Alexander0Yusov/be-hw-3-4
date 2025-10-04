@@ -4,6 +4,7 @@ import { Post } from '../types/post';
 import { db } from '../../db/mongo.db';
 import { PostQueryInput } from '../router/input/blog-query.input';
 import { injectable } from 'inversify';
+import { PostDocument } from '../domain/post.entity';
 
 @injectable()
 export class PostsRepository {
@@ -86,5 +87,11 @@ export class PostsRepository {
     if (deleteResult.deletedCount < 1) {
       throw new Error('Blog not exist');
     }
+  }
+
+  //
+
+  async save(post: PostDocument) {
+    await post.save();
   }
 }

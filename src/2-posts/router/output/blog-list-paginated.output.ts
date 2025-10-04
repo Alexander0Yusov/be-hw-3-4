@@ -5,7 +5,7 @@ export type PostListPaginatedOutput = {
   page: number;
   pageSize: number;
   totalCount: number;
-  items: (Omit<Post, 'blogId'> & {
+  items: (Omit<Post, 'blogId' | 'likesCount' | 'dislikesCount' | 'newestLikes'> & {
     id: string;
     blogId: string;
   })[];

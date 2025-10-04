@@ -15,6 +15,7 @@ import { RequestWithParamsAndBodyAndUserId } from '../../core/types/requests';
 import { IdType } from '../../core/types/id';
 import { CommentInputDto } from '../../6-comments/dto/comment-input.dto';
 import { UsersQwRepository } from '../../4-users/qw-repository/users-qw-repository';
+import { LikeStatus } from '../../8-likes/types/like';
 
 @injectable()
 export class PostsController {
@@ -56,7 +57,9 @@ export class PostsController {
 
       const { items, totalCount } = await this.postsService.findMany(queryInput as any);
 
-      const postsOutput = mapToPostListPaginatedOutput(items, {
+      const itemsWithMyStatus = items.map((item) => ({ ...item, myStatus: LikeStatus.None }));
+
+      const postsOutput = mapToPostListPaginatedOutput(itemsWithMyStatus, {
         pageNumber: queryInput.pageNumber,
         pageSize: queryInput.pageSize,
         totalCount,
@@ -77,7 +80,9 @@ export class PostsController {
         return;
       }
 
-      res.status(HttpStatus.Ok).send(mapToPostViewModel(post));
+      const postWithMyStatus = { ...post, myStatus: LikeStatus.None };
+
+      res.status(HttpStatus.Ok).send(mapToPostViewModel(postWithMyStatus));
     } catch (error: unknown) {
       res.sendStatus(HttpStatus.InternalServerError);
     }
@@ -94,7 +99,9 @@ export class PostsController {
 
       const createdPost = await this.postsService.create(req.body, req.body.blogId, blog.name);
 
-      const postViewModel = mapToPostViewModel(createdPost);
+      const createdPostWithMyStatus = { ...createdPost, myStatus: LikeStatus.None };
+
+      const postViewModel = mapToPostViewModel(createdPostWithMyStatus);
 
       res.status(HttpStatus.Created).send(postViewModel);
     } catch (error: unknown) {
