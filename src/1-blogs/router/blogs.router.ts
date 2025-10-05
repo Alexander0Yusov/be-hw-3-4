@@ -3,13 +3,7 @@ import { idValidationMiddleware } from '../../core/middlewares/validation/id-val
 import { errorsCatchMiddleware } from '../../core/middlewares/validation/errors-catch.middleware';
 import { superAdminGuardMiddleware } from '../../core/middlewares/validation/super-admin-guard.middleware';
 import { blogDtoValidationMiddleware } from '../validation/blog-dto-validation.middleware';
-import {
-  deleteBlogHandler,
-  getBlogHandler,
-  getBlogListHandler,
-  postBlogHandler,
-  putBlogHandler,
-} from './handlers';
+import { deleteBlogHandler, getBlogHandler, getBlogListHandler, postBlogHandler, putBlogHandler } from './handlers';
 import { paginationAndSortingValidation } from '../../core/middlewares/validation/query-pagination-sorting.validation-middleware';
 import { BlogSortField } from './input/blog-sort-field';
 import { query } from 'express-validator';
@@ -17,6 +11,7 @@ import { PostSortField } from '../../2-posts/router/input/post-sort-field';
 import { getPostListByBlogIdHandler } from './handlers/get-post-list-by-blog-id.handler';
 import { postPostByBlogIdHandler } from './handlers/post-post-by-blog-id.handler';
 import { postDtoByBlogIdValidationMiddleware } from '../validation/post-dto-by-blog-id-validation.middleware';
+import { accessTokenNoStrict } from '../../5-auth/router/guards/access.token.nostrict';
 
 export const blogsRouter = Router({});
 
@@ -29,16 +24,11 @@ blogsRouter
     getBlogListHandler,
   )
 
-  .post(
-    '',
-    superAdminGuardMiddleware,
-    blogDtoValidationMiddleware,
-    errorsCatchMiddleware,
-    postBlogHandler,
-  )
+  .post('', superAdminGuardMiddleware, blogDtoValidationMiddleware, errorsCatchMiddleware, postBlogHandler)
 
   .get(
     '/:id/posts',
+    accessTokenNoStrict,
     idValidationMiddleware,
     paginationAndSortingValidation(PostSortField),
     errorsCatchMiddleware,
@@ -65,10 +55,4 @@ blogsRouter
     putBlogHandler,
   )
 
-  .delete(
-    '/:id',
-    superAdminGuardMiddleware,
-    idValidationMiddleware,
-    errorsCatchMiddleware,
-    deleteBlogHandler,
-  );
+  .delete('/:id', superAdminGuardMiddleware, idValidationMiddleware, errorsCatchMiddleware, deleteBlogHandler);

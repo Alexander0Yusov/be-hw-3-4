@@ -32,7 +32,7 @@ export class CommentsService {
       const commentsIds = items.map((item) => item._id);
 
       // находим все лайки всех юзеров ко всем комментариям
-      const likes = await this.likesRepository.getLikesByCommentsIds(commentsIds);
+      const likes = await this.likesRepository.getLikesByParentsIds(commentsIds, userId);
 
       itemsWithLikesStatus = items.map((item) => {
         const itemWithCurrentUserStatus = likes.find(

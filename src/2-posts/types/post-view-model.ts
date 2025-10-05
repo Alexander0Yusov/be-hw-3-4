@@ -14,7 +14,7 @@ export type PostViewModel = {
     dislikesCount: number;
     myStatus: LikeStatus;
     newestLikes: {
-      addedAt: Date;
+      addedAt: string;
       userId: string;
       login: string;
     }[];

@@ -16,6 +16,7 @@ import { IdType } from '../../core/types/id';
 import { CommentInputDto } from '../../6-comments/dto/comment-input.dto';
 import { UsersQwRepository } from '../../4-users/qw-repository/users-qw-repository';
 import { LikeStatus } from '../../8-likes/types/like';
+import { LikesService } from '../../8-likes/application/likes.service';
 
 @injectable()
 export class PostsController {
@@ -24,6 +25,7 @@ export class PostsController {
     @inject(PostsRepository) private postsRepository: PostsRepository,
     @inject(CommentsService) private commentsService: CommentsService,
     @inject(UsersQwRepository) private usersQwRepository: UsersQwRepository,
+    @inject(LikesService) private likesService: LikesService,
   ) {}
 
   async getCommentListHandler(req: Request, res: Response) {
@@ -57,7 +59,25 @@ export class PostsController {
 
       const { items, totalCount } = await this.postsService.findMany(queryInput as any);
 
-      const itemsWithMyStatus = items.map((item) => ({ ...item, myStatus: LikeStatus.None }));
+      let itemsWithMyStatus;
+
+      if (req.user?.id) {
+        const parentsIds = items.map((item) => item._id);
+        const likesArray = await this.likesService.getLikesByParentsIds(parentsIds, req.user.id);
+
+        console.log(8888, likesArray);
+
+        itemsWithMyStatus = items.map((postItem) => ({
+          ...postItem,
+          myStatus:
+            likesArray.find((likeItem) => likeItem.parentId.toString() === postItem._id.toString())?.status ||
+            LikeStatus.None,
+        }));
+
+        console.log(999, itemsWithMyStatus);
+      } else {
+        itemsWithMyStatus = items.map((postItem) => ({ ...postItem, myStatus: LikeStatus.None }));
+      }
 
       const postsOutput = mapToPostListPaginatedOutput(itemsWithMyStatus, {
         pageNumber: queryInput.pageNumber,
@@ -80,7 +100,13 @@ export class PostsController {
         return;
       }
 
-      const postWithMyStatus = { ...post, myStatus: LikeStatus.None };
+      const userId = req.user?.id;
+      let postWithMyStatus = { ...post, myStatus: LikeStatus.None };
+
+      if (userId) {
+        const userStatus = await this.likesService.getUserLikeStatus(post._id.toString(), userId);
+        postWithMyStatus.myStatus = userStatus;
+      }
 
       res.status(HttpStatus.Ok).send(mapToPostViewModel(postWithMyStatus));
     } catch (error: unknown) {

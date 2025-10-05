@@ -15,7 +15,7 @@ export const likesSchema = new Schema<Like>(
     login: { type: String, required: false },
   },
   {
-    timestamps: true, // ← добавит createdAt и updatedAt автоматически
+    timestamps: true, // добавит createdAt и updatedAt автоматически
   },
 );
 

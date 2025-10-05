@@ -20,6 +20,10 @@ export async function runDb(connectionStr = mongoURI) {
 export async function clearDb() {
   const collections = await mongoose.connection.db?.listCollections().toArray(); //.connection.db.listCollections().toArray();
 
+  const names = collections?.map((c) => c.name);
+
+  console.log('Коллекции монго:', names);
+
   if (collections) {
     for (const { name } of collections) {
       await mongoose.connection.db?.collection(name).deleteMany({});

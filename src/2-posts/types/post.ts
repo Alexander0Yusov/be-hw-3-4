@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongodb';
 import { Like } from '../../8-likes/types/like';
 import mongoose from 'mongoose';
 
@@ -6,7 +5,7 @@ export type Post = {
   title: string;
   shortDescription: string;
   content: string;
-  blogId: mongoose.mongo.BSON.ObjectId;
+  blogId: mongoose.Types.ObjectId;
   blogName: string;
   createdAt: Date;
   //

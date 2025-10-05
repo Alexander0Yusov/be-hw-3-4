@@ -10,8 +10,10 @@ import { mapToPostListPaginatedOutput } from '../../../2-posts/mappers/map-to-po
 import { createErrorMessages } from '../../../core/utils/error.utils';
 import { container } from '../../../composition-root';
 import { LikeStatus } from '../../../8-likes/types/like';
+import { LikesService } from '../../../8-likes/application/likes.service';
 
 const postsService = container.get<PostsService>(PostsService);
+const likesService = container.get<LikesService>(LikesService);
 
 export async function getPostListByBlogIdHandler(req: Request, res: Response) {
   try {
@@ -28,7 +30,25 @@ export async function getPostListByBlogIdHandler(req: Request, res: Response) {
     // делаем запрос за постами в которых блогАйди данный
     const { items, totalCount } = await postsService.findManyById(req.params.id, queryInput as any);
 
-    const itemsWithMyStatus = items.map((item) => ({ ...item, myStatus: LikeStatus.None }));
+    let itemsWithMyStatus;
+
+    if (req.user?.id) {
+      const parentsIds = items.map((item) => item._id);
+      const likesArray = await likesService.getLikesByParentsIds(parentsIds, req.user.id);
+
+      console.log(8888, likesArray);
+
+      itemsWithMyStatus = items.map((postItem) => ({
+        ...postItem,
+        myStatus:
+          likesArray.find((likeItem) => likeItem.parentId.toString() === postItem._id.toString())?.status ||
+          LikeStatus.None,
+      }));
+
+      console.log(999, itemsWithMyStatus);
+    } else {
+      itemsWithMyStatus = items.map((postItem) => ({ ...postItem, myStatus: LikeStatus.None }));
+    }
 
     // мапим и возвращаем
     const postsOutput = mapToPostListPaginatedOutput(itemsWithMyStatus, {

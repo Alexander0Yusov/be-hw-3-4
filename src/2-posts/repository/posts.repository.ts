@@ -4,7 +4,9 @@ import { Post } from '../types/post';
 import { db } from '../../db/mongo.db';
 import { PostQueryInput } from '../router/input/blog-query.input';
 import { injectable } from 'inversify';
-import { PostDocument } from '../domain/post.entity';
+import { PostDocument, PostModel } from '../domain/post.entity';
+import mongoose from 'mongoose';
+import { Like } from '../../8-likes/types/like';
 
 @injectable()
 export class PostsRepository {
@@ -56,6 +58,10 @@ export class PostsRepository {
     const insertedResult = await db.getCollections().postCollection.insertOne(post);
 
     return { ...post, _id: insertedResult.insertedId };
+
+    // const insertedResult = await PostModel.createPost(post);
+
+    // return { ...post, _id: insertedResult._id };
   }
 
   async update(id: string, dto: PostInputDto, blogName: string): Promise<void> {
@@ -79,6 +85,30 @@ export class PostsRepository {
     return;
   }
 
+  async updateLikesData(
+    id: string,
+    likesCount: number,
+    dislikesCount: number,
+    newestLikes: WithId<Like>[],
+  ): Promise<void> {
+    const updateResult = await db.getCollections().postCollection.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          likesCount: likesCount,
+          dislikesCount: dislikesCount,
+          newestLikes: newestLikes,
+        },
+      },
+    );
+
+    if (updateResult.matchedCount < 1) {
+      throw new Error('Post not exist');
+    }
+
+    return;
+  }
+
   async delete(id: string): Promise<void> {
     const deleteResult = await db.getCollections().postCollection.deleteOne({
       _id: new ObjectId(id),
@@ -90,6 +120,14 @@ export class PostsRepository {
   }
 
   //
+  async find(id: string): Promise<WithId<Post> | null> {
+    // if (!mongoose.Types.ObjectId.isValid(id)) return null;
+    // const res = await PostModel.findById(id);
+    // return res;
+
+    const res2 = db.getCollections().postCollection.findOne({ _id: new ObjectId(id) });
+    return res2;
+  }
 
   async save(post: PostDocument) {
     await post.save();

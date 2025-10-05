@@ -25,6 +25,12 @@ describe('Comment API', () => {
       .expect(HttpStatus.NoContent);
   });
 
+  // beforeEach(async () => {
+  //   await request(app)
+  //     .delete(TESTING_PATH + '/all-data')
+  //     .expect(HttpStatus.NoContent);
+  // });
+
   afterAll(async () => {
     await db.stop();
     await mongoose.disconnect();
@@ -101,5 +107,58 @@ describe('Comment API', () => {
     await request(app)
       .get(COMMENTS_PATH + `/${createdComment.body.id}`)
       .expect(HttpStatus.NotFound);
+  });
+
+  it('should change status to value "like"; PUT posts', async () => {
+    // создание пользователя / логиним его / берем токен потом
+    const newUser = createFakeUser('r');
+
+    await request(app)
+      .post(USERS_PATH)
+      .set('Authorization', generateBasicAuthToken())
+      .send(newUser)
+      .expect(HttpStatus.Created);
+
+    const loginResponse = await request(app)
+      .post(AUTH_PATH + '/login')
+      .send({ loginOrEmail: newUser.email, password: newUser.password })
+      .expect(HttpStatus.Ok);
+
+    // создание блога
+    const createdBlog = await request(app)
+      .post(BLOGS_PATH)
+      .set('Authorization', generateBasicAuthToken())
+      .send(createFakeBlog())
+      .expect(HttpStatus.Created);
+
+    // создание пОста
+    const createdPost = await request(app)
+      .post(POSTS_PATH)
+      .set('Authorization', generateBasicAuthToken())
+      .send(createFakePost(createdBlog.body.id))
+      .expect(HttpStatus.Created);
+
+    // редактирование пОста ==== поставить лайк
+    await request(app)
+      .put(POSTS_PATH + `/${createdPost.body.id}` + '/like-status')
+      .set('Authorization', `Bearer ${loginResponse.body.accessToken}`)
+      .send({ likeStatus: 'Like' })
+      .expect(HttpStatus.NoContent);
+
+    // запрос пОста с новым статусом
+    const res2 = await request(app)
+      .get(POSTS_PATH + `/${createdPost.body.id}`)
+      .set('Authorization', `Bearer ${loginResponse.body.accessToken}`)
+      .expect(HttpStatus.Ok);
+
+    console.log(5555, res2.body);
+
+    // получение всех постов
+    const posts = await request(app)
+      .get(POSTS_PATH)
+      .set('Authorization', `Bearer ${loginResponse.body.accessToken}`)
+      .expect(HttpStatus.Ok);
+
+    console.log(66666, posts.body.items[0]);
   });
 });

@@ -46,14 +46,9 @@ class PostEntity {
     public newestLikes: Like[],
   ) {}
 
-  static createPost(dto: PostInputDto, blogName: string) {
+  static createPost(dto: Post) {
     const post = new PostModel({
       ...dto,
-      blogName,
-      createdAt: new Date(),
-      likesCount: 0,
-      dislikesCount: 0,
-      newestLikes: [],
     });
 
     return post;
@@ -82,4 +77,4 @@ class PostEntity {
 
 postSchema.loadClass(PostEntity);
 
-export const PostModel = model<Post, PostModel>('post', postSchema);
+export const PostModel = model<Post, PostModel>('Posts', postSchema);

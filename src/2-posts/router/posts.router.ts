@@ -11,12 +11,20 @@ import { CommentSortField } from './input/comment-sort-field';
 import { accessTokenNoStrict } from '../../5-auth/router/guards/access.token.nostrict';
 import { container } from '../../composition-root';
 import { PostsController } from '../controller/posts-controller';
+import { likeDtoValidationMiddleware } from '../../8-likes/validation/like-dto-validation.middleware';
+import { LikesController } from '../../8-likes/controller/likes-controller';
 
 export const postsRouter = Router({});
 const postsController = container.get<PostsController>(PostsController);
+const likesController = container.get<LikesController>(LikesController);
 
 postsRouter
-  .get('', paginationAndSortingValidation(PostSortField), postsController.getPostListHandler.bind(postsController))
+  .get(
+    '',
+    accessTokenNoStrict,
+    paginationAndSortingValidation(PostSortField),
+    postsController.getPostListHandler.bind(postsController),
+  )
 
   .get(
     '/:id/comments',
@@ -42,7 +50,13 @@ postsRouter
     postsController.postCommentHandler.bind(postsController),
   )
 
-  .get('/:id', idValidationMiddleware, errorsCatchMiddleware, postsController.getPostHandler.bind(postsController))
+  .get(
+    '/:id',
+    accessTokenNoStrict,
+    idValidationMiddleware,
+    errorsCatchMiddleware,
+    postsController.getPostHandler.bind(postsController),
+  )
 
   .put(
     '/:id',
@@ -59,4 +73,13 @@ postsRouter
     idValidationMiddleware,
     errorsCatchMiddleware,
     postsController.deletePostHandler.bind(postsController),
+  )
+
+  .put(
+    '/:id/like-status',
+    accessTokenGuard,
+    idValidationMiddleware,
+    likeDtoValidationMiddleware,
+    errorsCatchMiddleware,
+    likesController.createOrUpdateLikeStatus.bind(likesController),
   );

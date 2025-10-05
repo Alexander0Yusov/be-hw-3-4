@@ -14,15 +14,33 @@ export class LikesController {
       const newStatus = req.body.likeStatus;
       const userId = req.user!.id;
 
-      const updatedLikeStatus = await this.likesService.createOrUpdate(parentId, newStatus, userId);
+      console.log(333, req.baseUrl);
 
-      if (!updatedLikeStatus.data) {
-        res.sendStatus(resultCodeToHttpException(updatedLikeStatus.status));
+      if (req.baseUrl === '/comments') {
+        const updatedLikeStatus = await this.likesService.createOrUpdate(parentId, newStatus, userId);
+
+        if (!updatedLikeStatus.data) {
+          res.sendStatus(resultCodeToHttpException(updatedLikeStatus.status));
+          return;
+        }
+
+        res.status(resultCodeToHttpException(updatedLikeStatus.status)).send(updatedLikeStatus.data);
         return;
       }
 
-      res.status(resultCodeToHttpException(updatedLikeStatus.status)).send(updatedLikeStatus.data);
-      return;
+      if (req.baseUrl === '/posts') {
+        console.log(4444, parentId, newStatus, userId);
+
+        const updatedLikeStatus = await this.likesService.createOrUpdateLikeForPost(parentId, newStatus, userId);
+
+        if (!updatedLikeStatus.data) {
+          res.sendStatus(resultCodeToHttpException(updatedLikeStatus.status));
+          return;
+        }
+
+        res.status(resultCodeToHttpException(updatedLikeStatus.status)).send(updatedLikeStatus.data);
+        return;
+      }
     } catch (error: unknown) {
       res.sendStatus(HttpStatus.InternalServerError);
     }

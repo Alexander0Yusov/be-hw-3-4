@@ -6,14 +6,14 @@ import { WithId } from 'mongodb';
 
 @injectable()
 export class LikesRepository {
-  async createOrUpdate(parentId: string, authorId: string, newStatus: LikeStatus): Promise<string> {
+  async createOrUpdate(parentId: string, authorId: string, newStatus: LikeStatus, login?: string): Promise<string> {
     const result = await LikeModel.findOneAndUpdate(
       {
         parentId: new Types.ObjectId(parentId),
         authorId: new Types.ObjectId(authorId),
       },
       {
-        $set: { status: newStatus },
+        $set: { status: newStatus, login },
       },
       {
         new: true, // вернуть обновлённый документ
@@ -60,9 +60,25 @@ export class LikesRepository {
     return like?.status ?? LikeStatus.None;
   }
 
-  async getLikesByCommentsIds(commentsIds: Types.ObjectId[]): Promise<WithId<Like>[]> {
+  async getLikesByParentsIds(parentsIds: Types.ObjectId[], userId: string): Promise<WithId<Like>[]> {
     return await LikeModel.find({
-      parentId: { $in: commentsIds },
+      parentId: { $in: parentsIds },
+      authorId: new Types.ObjectId(userId),
+      status: { $in: ['Like', 'Dislike'] },
     }).lean();
+  }
+
+  //
+
+  async getLatestLikes(parentId: string): Promise<WithId<Like>[]> {
+    const latestLikes = await LikeModel.find({
+      parentId: parentId,
+      status: 'Like',
+    })
+      .sort({ createdAt: -1 }) // сортировка по времени — от новых к старым
+      .limit(3)
+      .lean();
+
+    return latestLikes;
   }
 }

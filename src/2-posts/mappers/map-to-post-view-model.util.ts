@@ -18,7 +18,7 @@ export function mapToPostViewModel(post: WithId<Post & { myStatus: LikeStatus }>
       dislikesCount: post.dislikesCount,
       myStatus: post.myStatus,
       newestLikes: post.newestLikes.map(({ createdAt, authorId, login }) => ({
-        addedAt: createdAt,
+        addedAt: createdAt.toISOString(),
         userId: authorId.toString(),
         login: login ? login : '',
       })),
