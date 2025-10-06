@@ -98,8 +98,6 @@ export class LikesService {
 
     const post = await this.postsRepository.find(parentId);
 
-    console.log(555, post);
-
     if (!post) {
       return {
         status: ResultStatus.NotFound,

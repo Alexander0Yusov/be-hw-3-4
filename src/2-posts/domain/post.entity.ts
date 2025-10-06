@@ -7,7 +7,7 @@ import { ObjectId } from 'mongodb';
 import { likesSchema } from '../../8-likes/domain/like.entity';
 
 interface PostMethods {
-  updatePost(dto: PostInputDto): void;
+  updatePost(dto: PostInputDto, blogName: string): void;
   updateLike(newestLikes: Like[], likesCount?: number, dislikesCount?: number): void;
 }
 
@@ -15,7 +15,7 @@ type PostStatics = typeof PostEntity;
 
 type PostModel = Model<Post, {}, PostMethods> & PostStatics;
 
-export type PostDocument = HydratedDocument<Post, PostMethods, ObjectId>;
+export type PostDocument = HydratedDocument<Post, PostMethods>;
 
 const postSchema = new mongoose.Schema<Post, PostModel, PostMethods>(
   {
@@ -37,7 +37,7 @@ class PostEntity {
     public title: string,
     public shortDescription: string,
     public content: string,
-    public blogId: mongoose.ObjectId,
+    public blogId: mongoose.Types.ObjectId,
     public blogName: string,
     public createdAt: Date,
 
@@ -54,13 +54,14 @@ class PostEntity {
     return post;
   }
 
-  updatePost(dto: PostInputDto) {
+  updatePost(dto: PostInputDto, blogName: string) {
     const { title, shortDescription, content, blogId } = dto;
 
     this.title = title;
     this.shortDescription = shortDescription;
     this.content = content;
-    this.blogId = new mongoose.Schema.Types.ObjectId(blogId);
+    this.blogId = new mongoose.Types.ObjectId(blogId);
+    this.blogName = blogName;
   }
 
   updateLike(newestLikes: Like[], likesCount?: number, dislikesCount?: number) {

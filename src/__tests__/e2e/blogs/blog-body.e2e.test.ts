@@ -7,6 +7,8 @@ import { BLOGS_PATH, TESTING_PATH } from '../../../core/paths/paths';
 import { generateBasicAuthToken } from '../../utils/generateBasicAuthToken';
 import { db } from '../../../db/mongo.db';
 import { SETTINGS } from '../../../core/settings/settings';
+import mongoose from 'mongoose';
+import { runDb } from '../../../db/mongoose.db';
 
 describe('Blog API body validation check', () => {
   const app = express();
@@ -14,6 +16,7 @@ describe('Blog API body validation check', () => {
 
   beforeAll(async () => {
     await db.run(SETTINGS.MONGO_URL);
+    await runDb(SETTINGS.MONGO_URL);
 
     await request(app)
       .delete(TESTING_PATH + '/all-data')
@@ -22,6 +25,7 @@ describe('Blog API body validation check', () => {
 
   afterAll(async () => {
     await db.stop();
+    await mongoose.disconnect();
   });
 
   it(`❌ should not create blog when incorrect body passed; POST /api/blogs`, async () => {

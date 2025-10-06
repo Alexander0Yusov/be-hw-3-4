@@ -7,6 +7,8 @@ import { generateBasicAuthToken } from '../../utils/generateBasicAuthToken';
 import { db } from '../../../db/mongo.db';
 import { SETTINGS } from '../../../core/settings/settings';
 import { createFakeUser } from '../../utils/users/create-fake-user';
+import { runDb } from '../../../db/mongoose.db';
+import mongoose from 'mongoose';
 
 describe('Auth API', () => {
   const app = express();
@@ -14,12 +16,16 @@ describe('Auth API', () => {
 
   beforeAll(async () => {
     await db.run(SETTINGS.MONGO_URL);
+    await runDb(SETTINGS.MONGO_URL);
+
     await db.drop();
   });
 
   afterAll(async () => {
     await db.drop();
+
     await db.stop();
+    await mongoose.disconnect();
   });
 
   it('should return status code 204; POST /auth/login', async () => {

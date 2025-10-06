@@ -9,6 +9,8 @@ import { PostInputDto } from '../../../2-posts/dto/post-input.dto';
 import { db } from '../../../db/mongo.db';
 import { SETTINGS } from '../../../core/settings/settings';
 import { createFakeBlog } from '../../utils/blogs/create-fake-blog';
+import { runDb } from '../../../db/mongoose.db';
+import mongoose from 'mongoose';
 
 describe('Post API', () => {
   const app = express();
@@ -16,14 +18,18 @@ describe('Post API', () => {
 
   beforeAll(async () => {
     await db.run(SETTINGS.MONGO_URL);
+    await runDb(SETTINGS.MONGO_URL);
 
     await request(app)
       .delete(TESTING_PATH + '/all-data')
       .expect(HttpStatus.NoContent);
   });
+
   afterAll(async () => {
     await db.stop();
+    await mongoose.disconnect();
   });
+
   it('should create post; POST posts', async () => {
     const createdBlog = await request(app)
       .post(BLOGS_PATH)

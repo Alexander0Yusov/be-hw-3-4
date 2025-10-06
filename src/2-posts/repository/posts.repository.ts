@@ -16,15 +16,13 @@ export class PostsRepository {
     const skip = (pageNumber - 1) * pageSize;
     const filter: any = {};
 
-    const items = await db
-      .getCollections()
-      .postCollection.find(filter)
+    const items = await PostModel.find(filter)
       .sort({ [sortBy]: sortDirection })
       .skip(skip)
       .limit(pageSize)
-      .toArray();
+      .lean();
 
-    const totalCount = await db.getCollections().postCollection.countDocuments(filter);
+    const totalCount = await PostModel.countDocuments(filter);
 
     return { items, totalCount };
   }
@@ -37,35 +35,36 @@ export class PostsRepository {
 
     filter.blogId = new ObjectId(id);
 
-    const items = await db
-      .getCollections()
-      .postCollection.find(filter)
+    const items = await PostModel.find(filter)
       .sort({ [sortBy]: sortDirection })
       .skip(skip)
       .limit(pageSize)
-      .toArray();
+      .lean();
 
-    const totalCount = await db.getCollections().postCollection.countDocuments(filter);
+    const totalCount = await PostModel.countDocuments(filter);
 
     return { items, totalCount };
   }
 
   async findById(id: string): Promise<WithId<Post> | null> {
-    return db.getCollections().postCollection.findOne({ _id: new ObjectId(id) });
+    const res = await PostModel.findOne({ _id: new ObjectId(id) }).lean();
+
+    return res;
   }
 
   async create(post: Post): Promise<WithId<Post>> {
-    const insertedResult = await db.getCollections().postCollection.insertOne(post);
+    // const insertedResult = await db.getCollections().postCollection.insertOne(post);
 
-    return { ...post, _id: insertedResult.insertedId };
+    // return { ...post, _id: insertedResult.insertedId };
 
-    // const insertedResult = await PostModel.createPost(post);
+    const preparedPost = PostModel.createPost(post);
+    await preparedPost.save();
 
-    // return { ...post, _id: insertedResult._id };
+    return { ...post, _id: preparedPost._id };
   }
 
   async update(id: string, dto: PostInputDto, blogName: string): Promise<void> {
-    const updateResult = await db.getCollections().postCollection.updateOne(
+    const updateResult = await PostModel.updateOne(
       { _id: new ObjectId(id) },
       {
         $set: {
@@ -77,6 +76,8 @@ export class PostsRepository {
         },
       },
     );
+
+    console.log(7777, updateResult);
 
     if (updateResult.matchedCount < 1) {
       throw new Error('Post not exist');
@@ -91,7 +92,7 @@ export class PostsRepository {
     dislikesCount: number,
     newestLikes: WithId<Like>[],
   ): Promise<void> {
-    const updateResult = await db.getCollections().postCollection.updateOne(
+    const updateResult = await PostModel.updateOne(
       { _id: new ObjectId(id) },
       {
         $set: {
@@ -102,6 +103,8 @@ export class PostsRepository {
       },
     );
 
+    console.log(8888, updateResult);
+
     if (updateResult.matchedCount < 1) {
       throw new Error('Post not exist');
     }
@@ -110,7 +113,7 @@ export class PostsRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const deleteResult = await db.getCollections().postCollection.deleteOne({
+    const deleteResult = await PostModel.deleteOne({
       _id: new ObjectId(id),
     });
 
@@ -120,16 +123,24 @@ export class PostsRepository {
   }
 
   //
-  async find(id: string): Promise<WithId<Post> | null> {
-    // if (!mongoose.Types.ObjectId.isValid(id)) return null;
-    // const res = await PostModel.findById(id);
-    // return res;
+  async find(id: string): Promise<PostDocument | null> {
+    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+    const res = await PostModel.findById(id);
 
-    const res2 = db.getCollections().postCollection.findOne({ _id: new ObjectId(id) });
-    return res2;
+    console.log(33333, res);
+
+    return res;
+
+    // const res2 = PostModel.findOne({ _id: new ObjectId(id) });
+    // return res2;
   }
 
   async save(post: PostDocument) {
+    console.log(44444, post);
+    console.log(post instanceof mongoose.Model);
+
     await post.save();
+
+    console.log(5555, '=====');
   }
 }

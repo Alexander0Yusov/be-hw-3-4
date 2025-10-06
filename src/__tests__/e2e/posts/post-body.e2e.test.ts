@@ -8,6 +8,8 @@ import { createFakePost } from '../../utils/posts/create-fake-post';
 import { db } from '../../../db/mongo.db';
 import { SETTINGS } from '../../../core/settings/settings';
 import { createFakeBlog } from '../../utils/blogs/create-fake-blog';
+import { runDb } from '../../../db/mongoose.db';
+import mongoose from 'mongoose';
 
 describe('Post API body validation check', () => {
   const app = express();
@@ -15,6 +17,8 @@ describe('Post API body validation check', () => {
 
   beforeAll(async () => {
     await db.run(SETTINGS.MONGO_URL);
+    await runDb(SETTINGS.MONGO_URL);
+
     await request(app)
       .delete(TESTING_PATH + '/all-data')
       .expect(HttpStatus.NoContent);
@@ -22,6 +26,7 @@ describe('Post API body validation check', () => {
 
   afterAll(async () => {
     await db.stop();
+    await mongoose.disconnect();
   });
 
   it(`❌ should not create post when incorrect body passed; POST /api/posts'`, async () => {

@@ -14,8 +14,6 @@ export class LikesController {
       const newStatus = req.body.likeStatus;
       const userId = req.user!.id;
 
-      console.log(333, req.baseUrl);
-
       if (req.baseUrl === '/comments') {
         const updatedLikeStatus = await this.likesService.createOrUpdate(parentId, newStatus, userId);
 
@@ -29,8 +27,6 @@ export class LikesController {
       }
 
       if (req.baseUrl === '/posts') {
-        console.log(4444, parentId, newStatus, userId);
-
         const updatedLikeStatus = await this.likesService.createOrUpdateLikeForPost(parentId, newStatus, userId);
 
         if (!updatedLikeStatus.data) {

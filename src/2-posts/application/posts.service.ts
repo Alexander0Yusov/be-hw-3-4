@@ -4,6 +4,7 @@ import { Post } from '../types/post';
 import { PostQueryInput } from '../router/input/blog-query.input';
 import { PostInputDto } from '../dto/post-input.dto';
 import { inject, injectable } from 'inversify';
+import { PostDocument } from '../domain/post.entity';
 
 @injectable()
 export class PostsService {
@@ -37,8 +38,12 @@ export class PostsService {
     return this.postsRepository.findById(id);
   }
 
-  async update(id: string, dto: PostInputDto, blogName: string): Promise<void> {
-    await this.postsRepository.update(id, dto, blogName);
+  async update(post: PostDocument, dto: PostInputDto, blogName: string): Promise<void> {
+    post.updatePost(dto, blogName);
+
+    await this.postsRepository.save(post);
+
+    // await this.postsRepository.update(id, dto, blogName);
     return;
   }
 

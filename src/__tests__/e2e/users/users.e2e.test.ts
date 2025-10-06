@@ -7,6 +7,8 @@ import { generateBasicAuthToken } from '../../utils/generateBasicAuthToken';
 import { db } from '../../../db/mongo.db';
 import { SETTINGS } from '../../../core/settings/settings';
 import { createFakeUser } from '../../utils/users/create-fake-user';
+import { runDb } from '../../../db/mongoose.db';
+import mongoose from 'mongoose';
 
 describe('User API', () => {
   const app = express();
@@ -14,6 +16,7 @@ describe('User API', () => {
 
   beforeAll(async () => {
     await db.run(SETTINGS.MONGO_URL);
+    await runDb(SETTINGS.MONGO_URL);
 
     await request(app)
       .delete(TESTING_PATH + '/all-data')
@@ -22,6 +25,7 @@ describe('User API', () => {
 
   afterAll(async () => {
     await db.stop();
+    await mongoose.disconnect();
   });
 
   it('should create user; POST users', async () => {

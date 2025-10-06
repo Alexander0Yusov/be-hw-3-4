@@ -151,7 +151,7 @@ describe('Comment API', () => {
       .set('Authorization', `Bearer ${loginResponse.body.accessToken}`)
       .expect(HttpStatus.Ok);
 
-    console.log(5555, res2.body);
+    console.log(1111, res2.body);
 
     // получение всех постов
     const posts = await request(app)
@@ -159,6 +159,6 @@ describe('Comment API', () => {
       .set('Authorization', `Bearer ${loginResponse.body.accessToken}`)
       .expect(HttpStatus.Ok);
 
-    console.log(66666, posts.body.items[0]);
+    console.log(2222, posts.body.items[0]);
   });
 });

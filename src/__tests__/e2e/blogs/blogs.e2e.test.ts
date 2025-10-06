@@ -8,6 +8,8 @@ import { generateBasicAuthToken } from '../../utils/generateBasicAuthToken';
 import { BlogInputDto } from '../../../1-blogs/dto/blog-input.dto';
 import { db } from '../../../db/mongo.db';
 import { SETTINGS } from '../../../core/settings/settings';
+import { runDb } from '../../../db/mongoose.db';
+import mongoose from 'mongoose';
 
 describe('Blog API', () => {
   const app = express();
@@ -15,6 +17,7 @@ describe('Blog API', () => {
 
   beforeAll(async () => {
     await db.run(SETTINGS.MONGO_URL);
+    await runDb(SETTINGS.MONGO_URL);
 
     await request(app)
       .delete(TESTING_PATH + '/all-data')
@@ -23,6 +26,7 @@ describe('Blog API', () => {
 
   afterAll(async () => {
     await db.stop();
+    await mongoose.disconnect();
   });
 
   it('should create blog; POST blogs', async () => {
@@ -157,6 +161,8 @@ describe('Blog API', () => {
     const postListResponse = await request(app)
       .get(BLOGS_PATH + '/' + `${createdBlog.body.id}` + '/posts')
       .expect(HttpStatus.Ok);
+
+    console.log(88888, postListResponse.body);
 
     expect(postListResponse.body.items).toBeInstanceOf(Array);
     expect(postListResponse.body.items.length).toBeGreaterThanOrEqual(2);

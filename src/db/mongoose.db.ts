@@ -22,7 +22,7 @@ export async function clearDb() {
 
   const names = collections?.map((c) => c.name);
 
-  console.log('Коллекции монго:', names);
+  console.log('Коллекции монгус:', names);
 
   if (collections) {
     for (const { name } of collections) {

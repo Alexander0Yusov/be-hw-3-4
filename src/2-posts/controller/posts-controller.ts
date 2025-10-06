@@ -65,16 +65,12 @@ export class PostsController {
         const parentsIds = items.map((item) => item._id);
         const likesArray = await this.likesService.getLikesByParentsIds(parentsIds, req.user.id);
 
-        console.log(8888, likesArray);
-
         itemsWithMyStatus = items.map((postItem) => ({
           ...postItem,
           myStatus:
             likesArray.find((likeItem) => likeItem.parentId.toString() === postItem._id.toString())?.status ||
             LikeStatus.None,
         }));
-
-        console.log(999, itemsWithMyStatus);
       } else {
         itemsWithMyStatus = items.map((postItem) => ({ ...postItem, myStatus: LikeStatus.None }));
       }
@@ -125,6 +121,8 @@ export class PostsController {
 
       const createdPost = await this.postsService.create(req.body, req.body.blogId, blog.name);
 
+      console.log(7777, createdPost);
+
       const createdPostWithMyStatus = { ...createdPost, myStatus: LikeStatus.None };
 
       const postViewModel = mapToPostViewModel(createdPostWithMyStatus);
@@ -161,7 +159,7 @@ export class PostsController {
 
   async putPostHandler(req: Request, res: Response) {
     try {
-      const post = await this.postsService.findById(req.params.id);
+      const post = await this.postsRepository.find(req.params.id);
 
       if (!post) {
         res.status(HttpStatus.NotFound).send(createErrorMessages([{ field: 'id', message: 'Post not found' }]));
@@ -175,7 +173,9 @@ export class PostsController {
         return;
       }
 
-      await this.postsService.update(req.params.id, req.body, blog.name);
+      await this.postsService.update(post, req.body, blog.name);
+
+      console.log(6666, '======');
 
       res.sendStatus(HttpStatus.NoContent);
     } catch (error: unknown) {

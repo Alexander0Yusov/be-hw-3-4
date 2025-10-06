@@ -36,16 +36,12 @@ export async function getPostListByBlogIdHandler(req: Request, res: Response) {
       const parentsIds = items.map((item) => item._id);
       const likesArray = await likesService.getLikesByParentsIds(parentsIds, req.user.id);
 
-      console.log(8888, likesArray);
-
       itemsWithMyStatus = items.map((postItem) => ({
         ...postItem,
         myStatus:
           likesArray.find((likeItem) => likeItem.parentId.toString() === postItem._id.toString())?.status ||
           LikeStatus.None,
       }));
-
-      console.log(999, itemsWithMyStatus);
     } else {
       itemsWithMyStatus = items.map((postItem) => ({ ...postItem, myStatus: LikeStatus.None }));
     }
